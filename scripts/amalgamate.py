@@ -137,21 +137,29 @@ def reformat_file(file: os.PathLike, clang_format_exe: os.PathLike):
     if resolved_clang_format_exe is None:
         raise Exception("clang-format not found: {}".format(clang_format_exe))
     print("Reformatting file: {}".format(file))
-    subprocess.check_call((resolved_clang_format_exe, "-i", file))
+    # subprocess.check_call((resolved_clang_format_exe, "-i", file))
+    # subprocess.check_output((resolved_clang_format_exe, "-i", file))
+    subprocess.run((resolved_clang_format_exe, file), check=True)
+    subprocess.run((resolved_clang_format_exe, "-i", file), check=True)
 
 
 def main(options):
     base_dir = os.getcwd() if options.base is None else options.base
     # Use a suffix that clang-format recognizes as C++
     with NamedTemporaryFile(
-        "r", encoding="utf-8", suffix=".hh", delete=False
+        "r", encoding="utf-8", suffix=".hh", delete=False#, delete_on_close=True # requires python 3.11
     ) as temp_file:
         amalgamate(base_dir, options.input, temp_file.name)
-        reformat_file(temp_file.name, clang_format_exe=options.clang_format_exe)
         print("Saving output file: {}".format(options.output))
         os.makedirs(os.path.dirname(options.output), exist_ok=True)
-        shutil.move(temp_file.name, options.output)
-
+        try:
+            temp_file.close() # The file cannot be opened again on Windows (clang-format -i fails to write/shutil cannot move it)
+            reformat_file(temp_file.name, clang_format_exe=options.clang_format_exe)
+        except subprocess.CalledProcessError as cpe:
+            print(cpe.returncode, cpe.cmd, cpe.output, cpe.stderr)
+            raise cpe
+        shutil.copyfile(temp_file.name, options.output)
+	# TODO delete, use delete_on_close instead
 
 def parse_args():
     parser = ArgumentParser(
