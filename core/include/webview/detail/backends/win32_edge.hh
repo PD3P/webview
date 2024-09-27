@@ -351,11 +351,11 @@ public:
         case WM_SIZE:
           w->resize_widget();
           break;
-        case WM_MOVING:
-          OutputDebugStringA("WM_MOVING #2 detected\n"); // Debug output
-                                                         // fall through
-        case WM_MOVE:
-          OutputDebugStringA("WM_MOVE #2 detected\n"); // Debug output
+        // case WM_MOVING:
+        //   OutputDebugStringA("WM_MOVING #2 detected\n"); // Debug output
+        //                                                  // fall through
+        case WM_EXITSIZEMOVE: // TBD what if moved programmatically? alternative: timer + rearm
+          OutputDebugStringA("WM_EXITSIZEMOVE detected\n");
           w->on_position_changed();
           break;
         case WM_CLOSE:
@@ -455,11 +455,8 @@ public:
       case WM_SIZE:
         w->resize_webview();
         break;
-      case WM_MOVING:
-        OutputDebugStringA("WM_MOVING #2 detected\n"); // Debug output
-                                                       // fall through
-      case WM_MOVE:
-        OutputDebugStringA("WM_MOVE #2 detected\n"); // Debug output
+      case WM_EXITSIZEMOVE: // TBD what if moved programmatically? alternative: timer + rearm
+        OutputDebugStringA("WM_EXITSIZEMOVE detected\n");
         w->on_position_changed();
         break;
       case WM_DESTROY:
