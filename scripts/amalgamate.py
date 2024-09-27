@@ -158,7 +158,8 @@ def main(options):
         except subprocess.CalledProcessError as cpe:
             print(cpe.returncode, cpe.cmd, cpe.output, cpe.stderr)
             raise cpe
-        shutil.copyfile(temp_file.name, options.output)
+        # shutil.copyfile(temp_file.name, options.output)
+        shutil.move(temp_file.name, options.output)
 	# TODO delete, use delete_on_close instead
 
 def parse_args():
