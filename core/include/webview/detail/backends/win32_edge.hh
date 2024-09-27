@@ -346,9 +346,18 @@ public:
           return DefWindowProcW(hwnd, msg, wp, lp);
         }
 
+        printf("Message received: %d\n", msg);
         switch (msg) {
         case WM_SIZE:
           w->resize_widget();
+          break;
+        case WM_MOVE:
+          OutputDebugStringA("WM_MOVE #1 detected\n"); // Debug output
+          //   InvalidateRect(hwnd, nullptr, TRUE);
+          //   w->resize_webview();
+          //   w->resize_widget();
+        //   UpdateWindow(
+            //   w->m_widget); // This is fired every time AFTER the initial creation
           break;
         case WM_CLOSE:
           DestroyWindow(hwnd);
@@ -442,9 +451,29 @@ public:
         return DefWindowProcW(hwnd, msg, wp, lp);
       }
 
+    //   OutputDebugStringA(msg);
       switch (msg) {
       case WM_SIZE:
         w->resize_webview();
+        break;
+      case WM_MOVING:
+        OutputDebugStringA("WM_MOVING #2 detected\n"); // Debug output
+        // [[fallthrough]]; // Requires C++17
+			w->on_position_changed();
+        // if (m_controller) {
+        //   m_controller->NotifyParentWindowPositionChanged();
+        // }
+      case WM_MOVE:
+        OutputDebugStringA("WM_MOVE #2 detected\n"); // Debug output
+        // InvalidateRect(hwnd, nullptr, TRUE);
+        // w->resize_webview();
+        // w->resize_widget();
+        // UpdateWindow(w->m_widget); // Only fired once on creation, can probably ignore
+        // if (message == WM_MOVE || message == WM_MOVING)
+        // {
+			w->on_position_changed();
+        // return true;
+        // }
         break;
       case WM_DESTROY:
         w->m_widget = nullptr;
@@ -807,6 +836,13 @@ private:
     if (m_controller) {
       m_controller->MoveFocus(COREWEBVIEW2_MOVE_FOCUS_REASON_PROGRAMMATIC);
     }
+  }
+
+  void on_position_changed() {
+	OutputDebugStringA("OnPositionChanged -> NotifyParentWindowPositionChanged\n");
+	     if (m_controller) {
+          m_controller->NotifyParentWindowPositionChanged();
+        }
   }
 
   bool is_webview2_available() const noexcept {
